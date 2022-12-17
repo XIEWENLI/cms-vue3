@@ -1,10 +1,10 @@
 <template>
   <div class="main">
-    <Nav></Nav>
-    <Menu></Menu>
+    <Nav />
+    <Menu />
   </div>
   <div class="content" :class="{ open: openState }">
-    content
+    <router-view></router-view>
   </div>
 </template>
 
@@ -13,13 +13,15 @@
 import Nav from "../../components/Nav.vue"
 import Menu from "../../components/Menu.vue"
 
-import { computed } from "vue"
+import { watch, ref } from "vue"
+import { useRouter } from "vue-router"
 // mainStore的pinia
-import { mainStore } from "../../pinia/index"
+import mainStore from "../../pinia/mainStore"
 
 const main = mainStore()
-const openState = computed(() => {
-  return main.openState
+const openState = ref(true)
+watch(() => main.openState, (newV, oldV) => {
+  openState.value = newV
 })
 
 </script>
