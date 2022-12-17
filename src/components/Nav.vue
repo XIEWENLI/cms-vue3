@@ -1,25 +1,32 @@
 <template>
   <div class="nav" :class="{ open2: openState }">
-    <el-breadcrumb separator="/" style="font-size: 18px;">
+    <el-breadcrumb separator="" style="font-size: 20px;">
       <el-breadcrumb-item>
         <a>
           <i-ep-fold v-if="openState" @click="reverseOpen"></i-ep-fold>
           <i-ep-expand v-else @click="reverseOpen"></i-ep-expand>
         </a>
       </el-breadcrumb-item>
-      <el-breadcrumb-item style="padding-top: 9px;">promotion detail</el-breadcrumb-item>
+      <el-breadcrumb-item style="padding-top: 10px;">{{ url }}</el-breadcrumb-item>
     </el-breadcrumb>
   </div>
 </template>
 
 <script setup>
-import { computed } from "vue"
+import { watch, ref } from "vue"
 // mainStore的pinia
-import { mainStore } from "../pinia/index"
+import mainStore from "../pinia/mainStore"
 
 const main = mainStore()
-const openState = computed(() => {
-  return main.openState
+
+const url = ref("/main")
+watch(() => main.URL, (newV, oldV) => {
+  url.value = newV
+})
+
+const openState = ref(true)
+watch(() => main.openState, (newV, oldV) => {
+  openState.value = newV
 })
 const reverseOpen = () => {
   main.reverseOpenState()

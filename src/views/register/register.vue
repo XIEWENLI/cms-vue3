@@ -1,19 +1,19 @@
 <template>
-  <div class="login">
+  <div class="register">
     <div style="margin-top: -5%;">
-      <h1>登录界面</h1>
+      <h1>注册界面</h1>
       <Form />
     </div>
   </div>
 </template>
 
 <script setup>
-import Form from "./cpn/form.vue"
+import Form from "./cpn/Form.vue"
 
 </script>
 
 <style lang="less" scoped>
-.login {
+.register {
   position: absolute;
   height: 100%;
   width: 100%;
@@ -24,11 +24,11 @@ import Form from "./cpn/form.vue"
   align-items: center;
 }
 
-.login div {
+.register div {
   width: 450px;
 }
 
-.login div h1 {
+.register div h1 {
   text-align: center;
   padding-bottom: 5%;
 }

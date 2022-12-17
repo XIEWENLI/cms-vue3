@@ -1,57 +1,61 @@
 <template>
   <div class="menu">
-    <el-menu default-active="2" active-text-color="#ffd04b" text-color="#fff" background-color="#545c64"
+    <el-menu :default-active="actionIndex" active-text-color="#ffd04b" text-color="#fff" background-color="#545c64"
       class="el-menu-vertical-demo" :collapse="!openState">
       <img src="../../public/vite.svg" alt="图标显示错误">
-      <el-sub-menu index="1">
-        <template #title>
-          <el-icon>
-            <location />
-          </el-icon>
-          <span>Navigator One</span>
-        </template>
-        <el-menu-item-group>
-          <template #title><span>Group One</span></template>
-          <el-menu-item index="1-1">item one</el-menu-item>
-          <el-menu-item index="1-2">item two</el-menu-item>
-        </el-menu-item-group>
-        <el-menu-item-group title="Group Two">
-          <el-menu-item index="1-3">item three</el-menu-item>
-        </el-menu-item-group>
-        <el-sub-menu index="1-4">
-          <template #title><span>item four</span></template>
-          <el-menu-item index="1-4-1">item one</el-menu-item>
-        </el-sub-menu>
-      </el-sub-menu>
-      <el-menu-item index="2">
-        <el-icon><icon-menu /></el-icon>
-        <template #title>Navigator Two</template>
-      </el-menu-item>
-      <el-menu-item index="3" disabled>
+      <el-menu-item v-for="(item, i) in oneLevelMenu" ref="el" :index="i + 1 + ''" @click="menuHandle">
         <el-icon>
-          <document />
+          <template v-if="item.iconName === 'Histogram'">
+            <Histogram />
+          </template>
+          <template v-if="item.iconName === 'User'">
+            <User />
+          </template>
+          <template v-if="item.iconName === 'UserFilled'">
+            <UserFilled />
+          </template>
+          <template v-if="item.iconName === 'Folder'">
+            <Folder />
+          </template>
+          <template v-if="item.iconName === 'FolderOpened'">
+            <FolderOpened />
+          </template>
         </el-icon>
-        <template #title>Navigator Three</template>
-      </el-menu-item>
-      <el-menu-item index="4">
-        <el-icon>
-          <setting />
-        </el-icon>
-        <template #title>Navigator Four</template>
+        <template #title>{{ item.name }}</template>
       </el-menu-item>
     </el-menu>
   </div>
 </template>
 
-<script lang="ts" setup>
-import { computed } from 'vue'
+<script setup>
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 // mainStore的pinia
-import { mainStore } from "../pinia/index"
+import mainStore from "../pinia/mainStore"
 
+const router = useRouter()
 const main = mainStore()
-const openState = computed(() => {
-  return main.openState
+
+let openState = ref(true)
+watch(() => main.openState, (newV, oldV) => {
+  openState.value = newV
 })
+
+// 一级路由
+const oneLevelMenu = main.oneLevelMenu
+
+let actionIndex = ref("")
+watch(() => main.actionIndex, (newV, oldV) => {
+  actionIndex.value = newV
+})
+
+const menuHandle = (key) => {
+  actionIndex.value = key.index
+  let path = oneLevelMenu[key.index - 1].menuURL
+  main.URL = path
+  router.replace(path)
+}
+
 
 </script>
 
@@ -61,6 +65,10 @@ const openState = computed(() => {
   top: 0;
   left: 0;
   height: 100%;
+}
+
+.menu .el-menu-item {
+  font-size: 17px;
 }
 
 .menu img {
