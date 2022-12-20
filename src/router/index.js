@@ -34,18 +34,24 @@ const router = VueRouter.createRouter({
 });
 
 router.beforeEach(async (to, from) => {
-  const main = mainStore();
-  let userInfo = main.userInfo;
+  let userInfo = localCache.getCache("userInfo");
+  userInfo = userInfo ? JSON.parse(userInfo) : undefined;
 
-  if (to.path !== "/login" || to.path !== "/register") {
-    if (!userInfo) {
-      return "/login";
-    }
+  if (to.path === "/login" || to.path === "/register") {
+    return true;
+  }
+
+  if (!userInfo) {
+    return "/login";
   }
 
   // 解决刷新丢失页面问题
-  if (from.path === "/" && to.path !== "/main") {
-    main.recordURL = to.path;
+  if (
+    from.path === "/" &&
+    to.path !== "/main" &&
+    (to.path !== "/login" || to.path !== "/register")
+  ) {
+    mainStore().recordURL = to.path;
     return "/main";
   }
 

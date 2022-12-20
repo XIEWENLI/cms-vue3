@@ -32,7 +32,6 @@ const mainStore = defineStore("main", {
 });
 
 export async function reflectPage() {
-  console.log("页面刷新或初次渲染执行~");
   let userInfo = localCache.getCache("userInfo");
   userInfo = userInfo ? JSON.parse(userInfo) : undefined;
 

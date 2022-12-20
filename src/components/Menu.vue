@@ -65,6 +65,7 @@ const menuHandle = (key) => {
   top: 0;
   left: 0;
   height: 100%;
+  z-index: 99;
 }
 
 .menu .el-menu-item {

@@ -23,7 +23,6 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import XWLRequest from '../../../servise/index'
-import { URL } from '../../../constant/index'
 
 const router = useRouter()
 const formDataRef = ref()
