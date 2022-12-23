@@ -2,6 +2,7 @@ import * as VueRouter from "vue-router";
 
 import localCache from "../utils/cache";
 import mainStore from "../pinia/mainStore";
+import XWLRequest from "../servise/index";
 
 const routes = [
   { path: "/", redirect: "/main" },
@@ -43,14 +44,18 @@ router.beforeEach(async (to, from) => {
 
   if (!userInfo) {
     return "/login";
+  } else {
+    // token验证
+    const res = await XWLRequest.get({ url: "/auth/verifyToken" });
+    if (!res.data.status) {
+      ElMessage.error(res.data.message);
+      localCache.deleteCache("userInfo");
+      return "/login";
+    }
   }
 
   // 解决刷新丢失页面问题
-  if (
-    from.path === "/" &&
-    to.path !== "/main" &&
-    (to.path !== "/login" || to.path !== "/register")
-  ) {
+  if (from.path === "/" && to.path !== "/main") {
     mainStore().recordURL = to.path;
     return "/main";
   }
