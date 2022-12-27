@@ -47,6 +47,7 @@ router.beforeEach(async (to, from) => {
   } else {
     // token验证
     const res = await XWLRequest.get({ url: "/auth/verifyToken" });
+
     if (!res.data.status) {
       ElMessage.error(res.data.message);
       localCache.deleteCache("userInfo");

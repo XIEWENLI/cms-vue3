@@ -12,7 +12,6 @@ const mainStore = defineStore("main", {
       oneLevelMenu: [],
       actionIndex: "",
       URL: "/main",
-      recordURL: "",
     };
   },
   actions: {
@@ -41,6 +40,7 @@ export async function reflectPage() {
   // 动态添加路由
   main.addMenu();
 
+  main.oneLevelMenu = [];
   userInfo.menu.forEach((item) => {
     if (item.type === 1) {
       main.oneLevelMenu.push(item);

@@ -17,6 +17,11 @@ const rq1 = XWLRequest.get({ url: '/common/getStatus', params: { fieldName: "num
 const rq2 = XWLRequest.get({ url: '/common/getStatus', params: { fieldName: "memory" } })
 
 Promise.all([rq1, rq2]).then(res => {
+  if (!res[0].data.status) {
+    ElMessage.error(res[0].data.message)
+    return
+  }
+
   option.series[0].data[0] = res[0].data.message.numberOfUsers
   option.series[0].data[1] = res[1].data.message.memory
   var myChart = echarts.init(divEl.value);
