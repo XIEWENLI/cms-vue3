@@ -65,7 +65,6 @@ const submitForm = (formEl) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      console.log('submit!')
       XWLRequest.post({ url: '/user/login', data: { username: formData.username, password: formData.password } })
         .then(res => {
           let result = res.data
