@@ -1,19 +1,19 @@
 <template>
   <div class="user">
-    <commonTable :tableDataCommon="tableDataCommon" @againRequestCommon="againRequestCommon" />
+    <commonTable :tableDataCommon="tableDataCommon" @requestCommon="requestCommon" />
     <Table :tableData="tableData" @againRequest="againRequest" :sum="sum" />
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue"
-import commonTable from "./cpn/commonTable.vue"
+import commonTable from "./cpn/CommonTable.vue"
 import Table from "../../../components/Table.vue"
 import XWLRequest from "../../../servise/index"
 
 // 获取common表
 let tableDataCommon = ref([])
-const againRequestCommon = async () => {
+const requestCommon = async () => {
   const rq1 = XWLRequest.get({ url: '/common/getStatus', params: { fieldName: "loginStatus_all_admin" } })
   const rq2 = XWLRequest.get({ url: '/common/getStatus', params: { fieldName: "registerStatus_all_admin" } })
   const rq3 = XWLRequest.get({ url: '/common/getStatus', params: { fieldName: "loginStatus_all_user" } })
@@ -35,11 +35,11 @@ const againRequestCommon = async () => {
     console.log(err);
   })
 }
-againRequestCommon()
+requestCommon()
 
 // user表
 let tableData = ref([])
-const request = async (limit = 10, offset = 0) => {
+const getUsers = async (limit = 10, offset = 0) => {
   const res = await XWLRequest.get({ url: '/user/getUsers', params: { limit, offset } })
 
   if (!res.data.status) {
@@ -50,7 +50,7 @@ const request = async (limit = 10, offset = 0) => {
   // 对象数组
   tableData.value = res.data.message
 }
-request()
+getUsers()
 
 // 获取表数据总数
 let sum = ref()
@@ -72,7 +72,7 @@ const againRequest = (pages) => {
     offset.value = offset.value + limit.value * (pages - 1)
   }
 
-  request(limit.value, offset.value)
+  getUsers(limit.value, offset.value)
 }
 
 </script>
