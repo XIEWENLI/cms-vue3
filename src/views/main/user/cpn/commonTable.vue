@@ -37,7 +37,7 @@ const props = defineProps({
   tableDataCommon: Array
 })
 
-const emit = defineEmits(["againRequestCommon"])
+const emit = defineEmits(["requestCommon"])
 
 let tableDataCommon = reactive([])
 watch(() => props.tableDataCommon, (newV, oldV) => {
@@ -55,7 +55,7 @@ const updataStatus = async (rowVal, keyVal) => {
       message: res.data.message,
       type: 'success',
     })
-    emit("againRequestCommon")
+    emit("requestCommon")
   }
 
 }

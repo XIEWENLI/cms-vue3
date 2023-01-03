@@ -1,19 +1,31 @@
 <template>
   <div class="table">
     <!-- 表格 -->
-    <el-table v-if="tableData.length > 0" :data="tableData" border stripe style="width: 100%">
+    <el-table v-if="tableData.length > 0" :data="tableData" border stripe>
       <template v-for="item, key in tableData[0]" :key="key">
-        <el-table-column :prop="key" :label="key">
+        <el-table-column :prop="key" :label="key" :width="key === 'id' ? '80px' : 'none'">
           <!-- 一、user.vue -->
           <template v-if="key === 'loginStatus'" #header>
             状态
           </template>
-          <template v-if="key === 'loginStatus'" #default="{ row }">
-            <el-button v-if="row.loginStatus" size="small" type="danger" plain
-              @click="updataLoginStatus(row)">禁止登录</el-button>
-            <el-button v-else size="small" type="primary" plain @click="updataLoginStatus(row)">允许登录</el-button>
-            <el-button size="small" type="danger" plain @click="del(row)">删除</el-button>
+          <template v-if="key === 'role_id'" #header>
+            角色
           </template>
+          <template v-if="key === 'loginStatus'" #default="{ row }">
+            <div class="flex">
+              <el-button v-if="row.loginStatus" size="small" type="danger" plain
+                @click="updataLoginStatus(row)">禁止登录</el-button>
+              <el-button v-else size="small" type="primary" plain @click="updataLoginStatus(row)">允许登录</el-button>
+              <el-button size="small" type="danger" plain @click="del(row)">删除</el-button>
+            </div>
+          </template>
+          <template v-if="key === 'role_id'" #default="{ row }">
+            <div class="flex">
+              {{ row.role_id }}
+              <el-button size="small" type="primary" plain @click="updataRole(row)">修改角色</el-button>
+            </div>
+          </template>
+
 
           <!-- 二、role.vue -->
           <template v-if="key === 'roleName'" #header>
@@ -25,17 +37,56 @@
           <template v-if="key === 'power'" #header>
             权限
           </template>
-          <template v-if="key === 'power'" #default="{ row }">
-            <el-tree-select v-model="value" :data="data" multiple show-checkbox />
-            <el-divider />
+          <template v-if="key === 'grade'" #default="{ row }">
+            <div class="flex">
+              {{ row.grade }}
+              <el-button type="primary" size="small" plain @click="selectP(row)">查看权限</el-button>
+            </div>
           </template>
+          <template v-if="key === 'power'" #default="{ row }">
+            <div class="flex">
+              <el-button type="primary" @click="updatePower(row)" size="small" plain>修改权限</el-button>
+              <el-button type="danger" size="small" @click="delRole(row.id)" plain>删除</el-button>
+            </div>
+          </template>
+
         </el-table-column>
       </template>
     </el-table>
+
+    <!-- user.vue：修改角色 -->
+    <el-dialog v-model="dv" title="修改权限：" width="30%" :before-close="close">
+      <el-select v-model="roleVal" class="m-2" placeholder="请选择权限~" size="small">
+        <el-option v-for="item in allRole" :key="item.id" :label="item.roleName" :value="item.id" />
+      </el-select>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="close">取消</el-button>
+          <el-button type="primary" @click="confirm">
+            确认
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- role.vue：修改权限弹窗 -->
+    <el-dialog v-model="dialogVisible" title="修改权限：" width="30%" :before-close="handleClose">
+      <el-tree-select id="treeSelectEl" size="small" placement="left" :data="powerData" v-model="selectPower" multiple
+        clearable />
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="handleClose">取消</el-button>
+          <el-button type="primary" @click="confirmBtn">
+            确认
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+
     <div class="pagination">
       <!-- 分页 -->
-      <el-pagination v-model:current-page="currentPage" background layout="prev, pager, next" :total="sum ? sum : 0"
-        @current-change="handleCurrentChange" />
+      <el-pagination v-model:current-page="currentPage" background layout="prev, pager, next" ange="handleCurrentChange"
+        :total="sum ? sum : 0" @current-change="handleCurrentChange" />
     </div>
   </div>
 </template>
@@ -54,14 +105,20 @@ const emit = defineEmits(["againRequest"])
 
 let tableData = reactive([])
 watch(() => props.tableData, (newV, oldV) => {
+  // role_id换成roleName
+  if (newV[0].username && newV[0].role_id) {
+    newV.forEach(async item => {
+      item.role_id = await getRoleName(item.role_id)
+    })
+  }
   tableData = newV
 })
 
+// 数据总数
 let sum = ref()
-watch(() => props.power, (newV, oldV) => {
-  console.log(newV);
+watch(() => props.sum, (newV, oldV) => {
+  sum.value = newV
 })
-
 // 页数变化时触发
 let currentPage = ref(1)
 const handleCurrentChange = (page) => {
@@ -69,8 +126,9 @@ const handleCurrentChange = (page) => {
   emit("againRequest", currentPage.value)
 }
 
+
 // 一、user.vue
-// （1）修改loginStatus
+// 1、修改loginStatus
 const updataLoginStatus = async (rowVal) => {
   let loginStatus = rowVal.loginStatus ? 0 : 1
   const res = await XWLRequest.get({ url: "/user/updateUserLoginStatus", params: { user_id: rowVal.id, loginStatus } })
@@ -84,7 +142,7 @@ const updataLoginStatus = async (rowVal) => {
     emit("againRequest", currentPage.value)
   }
 }
-// （2）删除用户
+// 2、删除用户
 const del = async (rowVal) => {
   const res = await XWLRequest.get({ url: "/user/delUser", params: { user_id: rowVal.id } })
   if (!res.data.status) {
@@ -98,17 +156,152 @@ const del = async (rowVal) => {
     emit("againRequest", currentPage.value)
   }
 }
+// 3、获取指定角色接口
+const getRoleName = async (role_id) => {
+  const res = await XWLRequest.get({ url: "/roleANDmenu/getRoleById", params: { role_id } })
+  if (!res.data.status) {
+    ElMessage.error(res.data.message + "（获取指定角色权限）")
+  }
+  return res.data.message[0].roleName
+}
+// 4、查询所有角色（不附带权限信息）接口
+let allRole = reactive([])
+const getAllRole = async () => {
+  const res = await XWLRequest.get({ url: "/roleANDmenu/getAllRole" })
+  if (!res.data.status) {
+    ElMessage.error(res.data.message + "（修改角色权限）")
+  }
+
+  allRole = res.data.message
+}
+getAllRole()
+// 5、修改角色
+const roleVal = ref('')
+const dv = ref(false)
+const user_id = ref('')
+const updataRole = (row) => {
+  user_id.value = row.id
+  // 显示角色初始值
+  allRole.forEach(item => {
+    if (item.roleName === row.role_id) {
+      roleVal.value = item.id
+    }
+  })
+  dv.value = true
+}
+const confirm = async () => {
+  dv.value = false
+  let role_id = roleVal.value
+  const res = await XWLRequest.get({ url: '/user/updateRole', params: { user_id: user_id.value, role_id } })
+  if (!res.data.status) {
+    ElMessage.error(res.data.message)
+  } else {
+    emit("againRequest", currentPage.value)
+    ElMessage({
+      message: res.data.message,
+      type: 'success',
+    })
+  }
+}
+const close = () => {
+  dv.value = false
+}
 
 // 二、tole.vue
-let data = [{
-  value: '1',
-  label: 'Level one 1',
-},]
-const value = ref()
-watch(() => props.sum, (newV, oldV) => {
-  sum.value = newV
+let powerData = reactive([
+  {
+    value: '1',
+    label: '页面路由权限',
+    children: [],
+  },
+  {
+    value: '2',
+    label: '功能权限',
+    children: [],
+  }
+])
+// 1、获取全部power
+watch(() => props.power, (newV, oldV) => {
+  if (newV.length > 0) {
+    newV.forEach(item => {
+      if (item.type === 1) {
+        powerData[0].children.push({ value: item.id, label: item.name })
+      } else {
+        powerData[1].children.push({ value: item.id, label: item.name })
+      }
+    });
+  }
 })
-// （1）
+// 2、获取选中的power
+const selectPower = ref([])
+// 3、修改权限
+const dialogVisible = ref(false)
+const role_id = ref()
+// 3-1、弹出修改权限弹窗
+const updatePower = (roleInfo) => {
+  role_id.value = roleInfo.id
+  selectPower.value = []
+  // 显示原本的power
+  roleInfo.power.forEach(item => {
+    if (item.id) {
+      selectPower.value.push(item.id)
+    }
+  });
+  dialogVisible.value = true
+}
+// 3-2、确认修改权限
+const confirmBtn = async () => {
+  dialogVisible.value = false
+  await handlePower(role_id.value)
+  console.log(res);
+
+  emit("againRequest", currentPage.value)
+}
+// 3-3、关闭弹窗
+const handleClose = () => {
+  dialogVisible.value = false
+}
+// 3-4、执行发出修改请求
+const handlePower = async (role_id) => {
+  let menu_idArr = selectPower.value.join(",")
+
+  const res = await XWLRequest.get({ url: "/roleANDmenu/updateRole", params: { role_id, menu_idArr } })
+
+  if (!res.data.status) {
+    ElMessage.error(res.data.message)
+  } else {
+    selectPower[role_id] = []
+    ElMessage({
+      message: res.data.message,
+      type: 'success',
+    })
+  }
+}
+// 4、删除
+const delRole = async (role_id) => {
+  const res = await XWLRequest.get({ url: "/roleANDmenu/deleteRole", params: { role_id } })
+
+  if (!res.data.status) {
+    ElMessage.error(res.data.message)
+  } else {
+    emit("againRequest", currentPage.value)
+
+    ElMessage({
+      message: res.data.message,
+      type: 'success',
+    })
+  }
+}
+// 5、查看指定角色权限
+const selectP = (row) => {
+  let power = []
+  row.power.forEach(item => {
+    power.push(item.powerName)
+  });
+  ElMessageBox.alert(power, '全部权限', {
+    confirmButtonText: 'OK'
+  })
+}
 
 </script>
 
@@ -122,5 +315,11 @@ watch(() => props.sum, (newV, oldV) => {
   margin-right: 12%;
   display: flex;
   justify-content: end;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 </style>
