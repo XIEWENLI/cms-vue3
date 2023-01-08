@@ -2,7 +2,10 @@
   <div class="menu">
     <el-menu :default-active="actionIndex" active-text-color="#ffd04b" text-color="#fff" background-color="#545c64"
       class="el-menu-vertical-demo" :collapse="!openState">
-      <img src="../../public/vite.svg" alt="图标显示错误">
+      <div class="title">
+        <img src="../../public/vite.svg" alt="图标显示错误">
+        <h3 :class="{ h3None: !openState }">node+vue</h3>
+      </div>
       <el-menu-item v-for="(item, i) in oneLevelMenu" ref="el" :index="i + 1 + ''" @click="menuHandle">
         <el-icon>
           <template v-if="item.iconName === 'Histogram'">
@@ -72,10 +75,18 @@ const menuHandle = (key) => {
   font-size: 17px;
 }
 
-.menu img {
+.menu .title {
   display: flex;
-  margin: 0 auto;
+  padding-left: 15px;
   padding-top: 10px;
+}
+
+.menu .title h3 {
+  color: white;
+}
+
+.h3None {
+  display: none;
 }
 
 .el-menu-vertical-demo:not(.el-menu--collapse) {

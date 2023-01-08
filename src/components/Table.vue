@@ -21,7 +21,7 @@
           </template>
           <template v-if="key === 'role_id'" #default="{ row }">
             <div class="flex">
-              {{ row.role_id }}
+              {{ (typeof row.role_id) === 'number' ? '角色名' : row.role_id }}
               <el-button size="small" type="primary" plain @click="updataRole(row)">修改角色</el-button>
             </div>
           </template>
@@ -47,6 +47,15 @@
             <div class="flex">
               <el-button type="primary" @click="updatePower(row)" size="small" plain>修改权限</el-button>
               <el-button type="danger" size="small" @click="delRole(row.id)" plain>删除</el-button>
+            </div>
+          </template>
+
+          <!-- 三、photo.vue -->
+          <template v-if="key === 'file'" #default="{ row }">
+            <div class="flex">
+              <el-image class="elImage" :preview-teleported="true" :src="row.file" :zoom-rate="1.2"
+                :preview-src-list="[row.file]" fit="fill" />
+              <el-button type="info" @click="">下载</el-button>
             </div>
           </template>
 
@@ -93,7 +102,7 @@
 
 <script setup>
 import { defineProps, watch, reactive, defineEmits, ref } from "vue"
-
+import { baseURL } from '../constant/index'
 import XWLRequest from "../servise/index";
 
 const props = defineProps({
@@ -111,6 +120,14 @@ watch(() => props.tableData, (newV, oldV) => {
       item.role_id = await getRoleName(item.role_id)
     })
   }
+
+  // photo添加file内容
+  if (newV[0].fileHashName && newV[0].fileName) {
+    newV.forEach(async item => {
+      item.file = `${baseURL}/file/getFile?file_id=${item.id}`
+    })
+  }
+
   tableData = newV
 })
 
@@ -253,7 +270,6 @@ const updatePower = (roleInfo) => {
 const confirmBtn = async () => {
   dialogVisible.value = false
   await handlePower(role_id.value)
-  console.log(res);
 
   emit("againRequest", currentPage.value)
 }
@@ -303,6 +319,9 @@ const selectP = (row) => {
   })
 }
 
+// 三、photo.vue
+
+
 </script>
 
 <style lang="less" scoped>
@@ -312,7 +331,7 @@ const selectP = (row) => {
 
 .pagination {
   margin-top: 10px;
-  margin-right: 12%;
+  margin-right: 8%;
   display: flex;
   justify-content: end;
 }
@@ -321,5 +340,10 @@ const selectP = (row) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.elImage {
+  width: 100px;
+  height: 100px;
 }
 </style>
