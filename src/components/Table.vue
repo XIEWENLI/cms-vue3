@@ -1,7 +1,9 @@
 <template>
-  <div class="table">
-    <!-- 表格 -->
-    <el-table v-if="tableData.length > 0" :data="tableData" border stripe>
+  <!-- table数据为空显示 -->
+  <el-empty v-if="tableData.length <= 0" style="height: 100%;" description="数据为空~" :image-size="300" />
+  <div class="table" v-if="tableData.length > 0">
+    <!-- table表格 -->
+    <el-table :data="tableData" border stripe>
       <template v-for="item, key in tableData[0]" :key="key">
         <el-table-column :prop="key" :label="key" :width="key === 'id' ? '80px' : 'none'">
           <!-- 一、user.vue -->
@@ -51,11 +53,24 @@
           </template>
 
           <!-- 三、photo.vue -->
+          <template v-if="key === 'fileName'" #header>
+            文件名
+          </template>
+          <template v-if="key === 'type'" #header>
+            类型
+          </template>
+          <template v-if="key === 'user_id'" #header>
+            用户名
+          </template>
+          <template v-if="key === 'file'" #header>
+            图片
+          </template>
           <template v-if="key === 'file'" #default="{ row }">
             <div class="flex">
               <el-image class="elImage" :preview-teleported="true" :src="row.file" :zoom-rate="1.2"
                 :preview-src-list="[row.file]" fit="fill" />
-              <el-button type="info" @click="">下载</el-button>
+              <el-button size="small" type="info" @click="downloadImage(row)" plain>下载</el-button>
+              <el-button size="small" type="danger" @click="deleteImage(row)" plain>删除</el-button>
             </div>
           </template>
 
@@ -92,8 +107,8 @@
       </template>
     </el-dialog>
 
+    <!-- 分页 -->
     <div class="pagination">
-      <!-- 分页 -->
       <el-pagination v-model:current-page="currentPage" background layout="prev, pager, next" ange="handleCurrentChange"
         :total="sum ? sum : 0" @current-change="handleCurrentChange" />
     </div>
@@ -103,6 +118,7 @@
 <script setup>
 import { defineProps, watch, reactive, defineEmits, ref } from "vue"
 import { baseURL } from '../constant/index'
+import mainStore from "../pinia/mainStore"
 import XWLRequest from "../servise/index";
 
 const props = defineProps({
@@ -112,19 +128,22 @@ const props = defineProps({
 })
 const emit = defineEmits(["againRequest"])
 
+// table展示数据
 let tableData = reactive([])
 watch(() => props.tableData, (newV, oldV) => {
   // role_id换成roleName
-  if (newV[0].username && newV[0].role_id) {
+  if (newV[0]?.username && newV[0]?.role_id) {
     newV.forEach(async item => {
       item.role_id = await getRoleName(item.role_id)
     })
   }
 
   // photo添加file内容
-  if (newV[0].fileHashName && newV[0].fileName) {
+  if (newV[0]?.fileHashName && newV[0]?.fileName) {
     newV.forEach(async item => {
-      item.file = `${baseURL}/file/getFile?file_id=${item.id}`
+      delete item["fileHashName"]
+      item.file = `${baseURL}/file/getFile?file_id=${item.id}&token=${token.value}`
+      item.user_id = await getUserInfo(item.user_id)
     })
   }
 
@@ -149,6 +168,7 @@ const handleCurrentChange = (page) => {
 const updataLoginStatus = async (rowVal) => {
   let loginStatus = rowVal.loginStatus ? 0 : 1
   const res = await XWLRequest.get({ url: "/user/updateUserLoginStatus", params: { user_id: rowVal.id, loginStatus } })
+
   if (!res.data.status) {
     ElMessage.error(res.data.message)
   } else {
@@ -320,7 +340,42 @@ const selectP = (row) => {
 }
 
 // 三、photo.vue
+// 1、获取token
+const main = mainStore()
+const token = ref(main.userInfo.token)
+// 2、根据id获取用户信息
+const getUserInfo = async (user_id) => {
+  const res = await XWLRequest.get({ url: "/user/getUserById", params: { user_id } })
 
+  if (!res.data.status) {
+    ElMessage.error(res.data.message + "（获取指定用户权限）")
+  }
+  return res.data.message[0].username
+}
+// 3、文件下载图片
+const downloadImage = async ({ id: file_id, fileName, type }) => {
+  let fn = fileName + "." + type.split('/')[1]
+
+  const a = document.createElement('a')
+  a.download = 'xiazai'
+  a.href = `${baseURL}/file/downloadFile?file_id=${file_id}&fileName=${fn}&token=${token.value}`
+  a.click();
+}
+// 4、删除图片
+const deleteImage = async ({ id: file_id, user_id: userName }) => {
+  const res = await XWLRequest.get({ url: "/file/deleteFile", params: { file_id, userName, url: 'upload/uploadPhotos/photos' } })
+
+  if (!res.data.status) {
+    ElMessage.error(res.data.message + "（获取指定用户权限）")
+  } else {
+    emit("againRequest", currentPage.value)
+
+    ElMessage({
+      message: res.data.message,
+      type: 'success',
+    })
+  }
+}
 
 </script>
 
