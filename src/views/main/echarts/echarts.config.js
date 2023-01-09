@@ -18,7 +18,7 @@ const option = {
   xAxis: [
     {
       type: "category",
-      data: ["用户人数", "内存使用  "],
+      data: ["用户人数", "内存使用数值（M）"],
       axisTick: {
         alignWithLabel: true,
       },
