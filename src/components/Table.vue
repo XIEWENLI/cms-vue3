@@ -5,7 +5,8 @@
     <!-- table表格 -->
     <el-table :data="tableData" border stripe>
       <template v-for="item, key in tableData[0]" :key="key">
-        <el-table-column :prop="key" :label="key" :width="key === 'id' ? '80px' : 'none'">
+        <el-table-column :prop="key" :label="key"
+          :width="key === 'id' ? '80px' : (key === 'fileName' || key === 'type' || key === 'user_id' || key === 'size' ? '180px' : 'none')">
           <!-- 一、user.vue -->
           <template v-if="key === 'loginStatus'" #header>
             状态
@@ -52,7 +53,7 @@
             </div>
           </template>
 
-          <!-- 三、photo.vue -->
+          <!-- 三、photo.vue和video.vue -->
           <template v-if="key === 'fileName'" #header>
             文件名
           </template>
@@ -62,16 +63,32 @@
           <template v-if="key === 'user_id'" #header>
             用户名
           </template>
+          <template v-if="key === 'size'" #header>
+            size（单位：M）
+          </template>
           <template v-if="key === 'file'" #header>
-            图片
+            文件
           </template>
           <template v-if="key === 'file'" #default="{ row }">
-            <div class="flex">
+            <!-- image -->
+            <div class="flex" style="justify-content: space-around;" v-if="row.type.split('/')[0] === 'image'">
               <el-image class="elImage" :preview-teleported="true" :src="row.file" :zoom-rate="1.2"
                 :preview-src-list="[row.file]" fit="fill" />
-              <el-button size="small" type="info" @click="downloadImage(row)" plain>下载</el-button>
-              <el-button size="small" type="danger" @click="deleteImage(row)" plain>删除</el-button>
+              <el-button size="small" type="info" @click="downloadFile(row)" plain>下载</el-button>
+              <el-button size="small" type="danger" @click="deleteFile(row)" plain>删除</el-button>
             </div>
+            <!-- video -->
+            <div class="flex" v-else>
+              <video width='220' height="160" :src="row.file" controls="controls">
+                <source :src="row.file" type="video/mp4">
+                您的浏览器不支持 HTML5 video 标签。
+              </video>
+              <el-button size="small" type="info" @click="downloadFile(row)" plain>下载</el-button>
+              <el-button size="small" type="danger" @click="deleteFile(row)" plain>删除</el-button>
+            </div>
+          </template>
+          <template v-if="key === 'size'" #default="{ row }">
+            {{ (row.size / 1024 / 1024).toFixed(3) }}
           </template>
 
         </el-table-column>
@@ -116,10 +133,11 @@
 </template>
 
 <script setup>
-import { defineProps, watch, reactive, defineEmits, ref } from "vue"
+import { defineProps, watch, reactive, defineEmits, ref, nextTick } from "vue"
 import { baseURL } from '../constant/index'
 import mainStore from "../pinia/mainStore"
 import XWLRequest from "../servise/index";
+
 
 const props = defineProps({
   tableData: Array,
@@ -339,7 +357,7 @@ const selectP = (row) => {
   })
 }
 
-// 三、photo.vue
+// 三、photo.vue和video.vue
 // 1、获取token
 const main = mainStore()
 const token = ref(main.userInfo.token)
@@ -352,8 +370,8 @@ const getUserInfo = async (user_id) => {
   }
   return res.data.message[0].username
 }
-// 3、文件下载图片
-const downloadImage = async ({ id: file_id, fileName, type }) => {
+// 3、下载文件
+const downloadFile = async ({ id: file_id, fileName, type }) => {
   let fn = fileName + "." + type.split('/')[1]
 
   const a = document.createElement('a')
@@ -361,9 +379,12 @@ const downloadImage = async ({ id: file_id, fileName, type }) => {
   a.href = `${baseURL}/file/downloadFile?file_id=${file_id}&fileName=${fn}&token=${token.value}`
   a.click();
 }
-// 4、删除图片
-const deleteImage = async ({ id: file_id, user_id: userName }) => {
-  const res = await XWLRequest.get({ url: "/file/deleteFile", params: { file_id, userName, url: 'upload/uploadPhotos/photos' } })
+// 4、删除文件
+const deleteFile = async ({ id: file_id, user_id: userName, type }) => {
+  let ty = type.split('/')[0]
+  let url = ty === 'image' ? 'upload/uploadPhotos/photos' : 'upload/uploadVideo/videos'
+
+  const res = await XWLRequest.get({ url: "/file/deleteFile", params: { file_id, userName, url } })
 
   if (!res.data.status) {
     ElMessage.error(res.data.message + "（获取指定用户权限）")
@@ -398,7 +419,12 @@ const deleteImage = async ({ id: file_id, user_id: userName }) => {
 }
 
 .elImage {
-  width: 100px;
+  width: 160px;
   height: 100px;
+}
+
+.video-player {
+  background-color: black;
+  width: 100%;
 }
 </style>
