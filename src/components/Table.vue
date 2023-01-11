@@ -3,11 +3,14 @@
   <el-empty v-if="tableData.length <= 0" style="height: 100%;" description="数据为空~" :image-size="300" />
   <div class="table" v-if="tableData.length > 0">
     <!-- table表格 -->
-    <el-table :data="tableData" border stripe>
+    <el-table :data="tableData" border stripe :height="tableData[0].username ? 400 : 510">
       <template v-for="item, key in tableData[0]" :key="key">
         <el-table-column :prop="key" :label="key"
           :width="key === 'id' ? '80px' : (key === 'fileName' || key === 'type' || key === 'user_id' || key === 'size' ? '180px' : 'none')">
           <!-- 一、user.vue -->
+          <template v-if="key === 'username'" #header>
+            用户名
+          </template>
           <template v-if="key === 'loginStatus'" #header>
             状态
           </template>
@@ -79,7 +82,7 @@
             </div>
             <!-- video -->
             <div class="flex" v-else>
-              <video width='220' height="160" :src="row.file" controls="controls">
+              <video width='220' height="100" :src="row.file" controls="controls">
                 <source :src="row.file" type="video/mp4">
                 您的浏览器不支持 HTML5 video 标签。
               </video>
@@ -133,11 +136,10 @@
 </template>
 
 <script setup>
-import { defineProps, watch, reactive, defineEmits, ref, nextTick } from "vue"
+import { defineProps, watch, reactive, defineEmits, ref, defineExpose } from "vue"
 import { baseURL } from '../constant/index'
 import mainStore from "../pinia/mainStore"
 import XWLRequest from "../servise/index";
-
 
 const props = defineProps({
   tableData: Array,
@@ -160,7 +162,7 @@ watch(() => props.tableData, (newV, oldV) => {
   if (newV[0]?.fileHashName && newV[0]?.fileName) {
     newV.forEach(async item => {
       delete item["fileHashName"]
-      item.file = `${baseURL}/file/getFile?file_id=${item.id}&token=${token.value}`
+      item.file = `${baseURL}/file/getFile?file_id=${item.id}&user_id=${item.user_id}&token=${token.value}`
       item.user_id = await getUserInfo(item.user_id)
     })
   }
@@ -175,6 +177,7 @@ watch(() => props.sum, (newV, oldV) => {
 })
 // 页数变化时触发
 let currentPage = ref(1)
+defineExpose({ currentPage })
 const handleCurrentChange = (page) => {
   currentPage.value = page
   emit("againRequest", currentPage.value)
@@ -353,7 +356,8 @@ const selectP = (row) => {
     power.push(item.powerName)
   });
   ElMessageBox.alert(power, '全部权限', {
-    confirmButtonText: 'OK'
+    confirmButtonText: 'OK',
+    callback: (action) => { },
   })
 }
 
@@ -371,12 +375,14 @@ const getUserInfo = async (user_id) => {
   return res.data.message[0].username
 }
 // 3、下载文件
-const downloadFile = async ({ id: file_id, fileName, type }) => {
+const downloadFile = async ({ id: file_id, fileName, type, user_id }) => {
+  let userId = await getUserIdByUserName(user_id)
+
   let fn = fileName + "." + type.split('/')[1]
 
   const a = document.createElement('a')
   a.download = 'xiazai'
-  a.href = `${baseURL}/file/downloadFile?file_id=${file_id}&fileName=${fn}&token=${token.value}`
+  a.href = `${baseURL}/file/downloadFile?file_id=${file_id}&user_id=${userId}&fileName=${fn}&token=${token.value}`
   a.click();
 }
 // 4、删除文件
@@ -396,6 +402,15 @@ const deleteFile = async ({ id: file_id, user_id: userName, type }) => {
       type: 'success',
     })
   }
+}
+// 5、根据userName获取用户id
+const getUserIdByUserName = async (userName) => {
+  const res = await XWLRequest.get({ url: "/user/getUserByuserName", params: { userName } })
+
+  if (!res.data.status) {
+    ElMessage.error(res.data.message + "（获取指定用户权限）")
+  }
+  return res.data.message[0].id
 }
 
 </script>

@@ -9,15 +9,23 @@
       </el-breadcrumb-item>
       <el-breadcrumb-item style="padding-top: 10px;">{{ url }}</el-breadcrumb-item>
     </el-breadcrumb>
+    <div class="userInfo">
+      <h3>用户名：{{ username }}</h3>
+      <a href="JavaScript:0" @click="signOut">退出登录</a>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { watch, ref } from "vue"
+import { useRouter } from 'vue-router'
 // mainStore的pinia
 import mainStore from "../pinia/mainStore"
+import localCache from '../utils/cache'
 
 const main = mainStore()
+
+const username = ref(main.userInfo.username)
 
 const url = ref("/main")
 watch(() => main.URL, (newV, oldV) => {
@@ -32,12 +40,21 @@ const reverseOpen = () => {
   main.reverseOpenState()
 }
 
+// 退出
+const signOut = () => {
+  localCache.deleteCache('userInfo')
+  location.replace('/#/login')
+}
+
 </script>
 
 <style lang="less" scoped>
 .nav {
+  position: fixed;
+  top: 0;
+  z-index: 99;
   width: 100%;
-  padding: 7px 0 7px 0;
+  padding: 4px 0 4px 0;
   box-sizing: border-box;
   background-color: white;
   padding-left: 63px;
@@ -53,5 +70,17 @@ const reverseOpen = () => {
 
 .open2 {
   padding-left: 200px;
+}
+
+.userInfo {
+  position: absolute;
+  right: 30px;
+  top: 12px;
+  display: flex;
+
+  a {
+    margin-top: 1.8px;
+    font-size: 16px;
+  }
 }
 </style>

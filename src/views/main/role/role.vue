@@ -1,8 +1,13 @@
 <template>
   <div class="role">
-    <div class="btn"><el-button type="primary" @click="openDrawer">添加角色</el-button></div>
+    <div class="hd">
+      <Input @search="search" :placeholderVal="placeholderVal" />
+      <div class="btn">
+        <el-button type="primary" @click="openDrawer">添加角色</el-button>
+      </div>
+    </div>
     <Drawer :openStatus="openStatus" @closeStatus="closeStatus" :power="power" :pg="pg" @againRequest="againRequest" />
-    <Table :tableData="tableData" @againRequest="againRequest" :power="power" :sum="sum" />
+    <Table ref="tableEl" :tableData="tableData" @againRequest="againRequest" :power="power" :sum="sum" />
   </div>
 </template>
 
@@ -13,32 +18,16 @@ import Drawer from "./cpn/Drawer.vue"
 import Table from "../../../components/Table.vue"
 
 import XWLRequest from '../../../servise';
+import Input from "../../../components/Input.vue"
 
-// 获取所有角色（包含了power）
-let tableData = ref([])
-const getRole = async (limit = 10, offset = 1) => {
-  const res = await XWLRequest.get({ url: "/roleANDmenu/getRole", params: { limit, offset } })
-
-  if (!res.data.status) {
-    ElMessage.error(res.data.message)
-    return
-  }
-
-  tableData.value = res.data.message
-}
-getRole()
-
-// 页数变化，从新请求
-let pg = ref(1)
-const againRequest = (pages) => {
-  pg.value = pages
-  let limit = ref(10)
-  let offset = ref(1)
-  if (pages !== 1) {
-    offset.value = offset.value + limit.value * (pages - 1)
-  }
-
-  getRole(limit.value, offset.value)
+// table.vue
+// 1、table.vue的placeholder值
+const placeholderVal = ref('请输入角色名~')
+// 2、搜索
+const tableEl = ref(null)
+const search = (inputVal) => {
+  tableEl.value.currentPage = 1
+  againRequest(1, inputVal)
 }
 
 // 获取全部power
@@ -66,6 +55,47 @@ const getSum = async () => {
 }
 getSum()
 
+// 获取所有角色（包含了power）
+let tableData = ref([])
+const getRole = async (limit = 10, offset = 1, inputVal) => {
+  if (inputVal !== undefined) {
+    sum.value = 10
+  } else {
+    getSum()
+  }
+
+  const res = await XWLRequest.get({ url: "/roleANDmenu/getRole", params: { inputVal, limit, offset } })
+
+  if (!res.data.status) {
+    ElMessage.error(res.data.message)
+    return
+  }
+
+  tableData.value = res.data.message
+}
+getRole()
+
+
+// 页数变化，从新请求
+let pg = ref(1)
+const againRequest = (pages, inputVal) => {
+  inputVal = inputVal === '' ? undefined : inputVal
+  pg.value = pages
+  let limit = ref(10)
+  let offset = ref(1)
+  if (pages !== 1) {
+    offset.value = offset.value + limit.value * (pages - 1)
+  }
+
+
+
+  if (inputVal === undefined) {
+    getRole(limit.value, offset.value)
+  } else {
+    getRole(limit.value, offset.value, inputVal)
+  }
+}
+
 // 打开drawer
 let openStatus = ref(false)
 const openDrawer = () => {
@@ -82,9 +112,14 @@ const closeStatus = (val) => {
 .role {
   background-color: white;
 
-  .btn {
-    padding-top: 10px;
-    padding-left: 10px;
+  .hd {
+    display: flex;
+
+    .btn {
+      padding-top: 10px;
+      padding-left: 10px;
+    }
   }
+
 }
 </style>

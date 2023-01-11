@@ -33,6 +33,7 @@ watch(() => main.openState, (newV, oldV) => {
 .main {
   height: 100%;
   width: 100%;
+  margin-top: 57.8px;
 }
 
 .content {

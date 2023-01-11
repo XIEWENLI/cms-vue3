@@ -1,7 +1,8 @@
 <template>
   <div class="user">
     <commonTable :tableDataCommon="tableDataCommon" @requestCommon="requestCommon" />
-    <Table :tableData="tableData" @againRequest="againRequest" :sum="sum" />
+    <Input @search="search" :placeholderVal="placeholderVal" />
+    <Table ref="tableEl" :tableData="tableData" @againRequest="againRequest" :sum="sum" />
   </div>
 </template>
 
@@ -10,6 +11,17 @@ import { ref } from "vue"
 import commonTable from "./cpn/CommonTable.vue"
 import Table from "../../../components/Table.vue"
 import XWLRequest from "../../../servise/index"
+import Input from "../../../components/Input.vue"
+
+// table.vue
+// 1、table.vue的placeholder值
+const placeholderVal = ref('请输入用户名~')
+// 2、搜索
+const tableEl = ref(null)
+const search = (inputVal) => {
+  tableEl.value.currentPage = 1
+  againRequest(1, inputVal)
+}
 
 // 获取common表
 let tableDataCommon = ref([])
@@ -37,21 +49,6 @@ const requestCommon = async () => {
 }
 requestCommon()
 
-// user表
-let tableData = ref([])
-const getUsers = async (limit = 10, offset = 0) => {
-  const res = await XWLRequest.get({ url: '/user/getUsers', params: { limit, offset } })
-
-  if (!res.data.status) {
-    ElMessage.error(res.data.message)
-    return
-  }
-
-  // 对象数组
-  tableData.value = res.data.message
-}
-getUsers()
-
 // 获取表数据总数
 let sum = ref()
 const getSum = async () => {
@@ -64,15 +61,41 @@ const getSum = async () => {
 }
 getSum()
 
+// user表
+let tableData = ref([])
+const getUsers = async (limit = 10, offset = 0, inputVal) => {
+  if (inputVal !== undefined) {
+    sum.value = 10
+  } else {
+    getSum()
+  }
+
+  const res = await XWLRequest.get({ url: '/user/getUsers', params: { inputVal, limit, offset } })
+
+  if (!res.data.status) {
+    ElMessage.error(res.data.message)
+    return
+  }
+
+  // 对象数组
+  tableData.value = res.data.message
+}
+getUsers()
+
 // 页数变化，从新请求
-const againRequest = (pages) => {
+const againRequest = (pages, inputVal) => {
+  inputVal = inputVal === '' ? undefined : inputVal
   let limit = ref(10)
   let offset = ref(0)
   if (pages !== 1) {
     offset.value = offset.value + limit.value * (pages - 1)
   }
 
-  getUsers(limit.value, offset.value)
+  if (inputVal === undefined) {
+    getUsers(limit.value, offset.value)
+  } else {
+    getUsers(limit.value, offset.value, inputVal)
+  }
 }
 
 </script>
