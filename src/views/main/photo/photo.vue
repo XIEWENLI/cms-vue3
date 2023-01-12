@@ -32,7 +32,7 @@ const handleClose = (done) => {
   done()
 }
 // 上传文件类型
-const accept = ref('.png,jpeg')
+const accept = ref('.png,.jpeg,.jpg')
 
 // table.vue
 // 1、table.vue的placeholder值

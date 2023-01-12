@@ -13,6 +13,7 @@
 
 <script setup>
 import { onMounted, ref, defineEmits, defineProps } from 'vue'
+import mainStore from '../pinia/mainStore'
 import SparkMD5 from 'spark-md5'
 import XWLRequest from "../servise/index";
 import axios from 'axios';
@@ -100,8 +101,6 @@ onMounted(() => {
           progressEL.max = fileInfos.length;
         }
 
-        console.log(fileChunks);
-
         fileChunks.forEach((fileChunk) => {
           let formData = new FormData();
           formData.append("file", fileChunk.chunk);
@@ -110,7 +109,7 @@ onMounted(() => {
 
           promiseArr.push(
             axios
-              .post(`${baseURL}/file/uploadFileSlice`, formData).then((res) => {
+              .post(`${baseURL}/file/uploadFileSlice?token=${mainStore().userInfo.token}`, formData).then((res) => {
                 // 进度条-控制一个文件时
                 if (fileInfos.length === 1) {
                   progressVal += 1;
