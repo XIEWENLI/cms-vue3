@@ -57,7 +57,7 @@ const getSum = async () => {
     ElMessage.error(res.data.message)
     return
   }
-  sum.value = res.data.message.sum
+  sum.value = res.data.message.sum - 1
 }
 getSum()
 
@@ -90,6 +90,8 @@ const againRequest = (pages, inputVal) => {
   if (pages !== 1) {
     offset.value = offset.value + limit.value * (pages - 1)
   }
+
+  getSum()
 
   if (inputVal === undefined) {
     getUsers(limit.value, offset.value)
