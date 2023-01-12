@@ -18,7 +18,7 @@
           </template>
 
           <template #default="{ row }">
-            <el-button v-if="Number(row[key])" size="small" type="primary" plain
+            <el-button v-if="!Number(row[key])" size="small" type="primary" plain
               @click="updataStatus(row, key)">允许登录</el-button>
             <el-button v-else size="small" type="danger" plain @click="updataStatus(row, key)">禁止登录</el-button>
           </template>

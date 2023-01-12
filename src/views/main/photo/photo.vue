@@ -87,6 +87,8 @@ const againRequest = (pages = tableEl.value.currentPage, inputVal) => {
     offset.value = offset.value + limit.value * (pages - 1)
   }
 
+  getSum()
+
   if (inputVal === undefined) {
     getImage(limit.value, offset.value)
   } else {

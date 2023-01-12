@@ -41,7 +41,6 @@ Promise.all([rq1, rq2]).then(res => {
 }
 
 .divEl {
-
-  height: 600px;
+  height: 594px;
 }
 </style>

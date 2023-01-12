@@ -1,6 +1,6 @@
 <template>
   <!-- table数据为空显示 -->
-  <el-empty v-if="tableData.length <= 0" style="height: 100%;" description="数据为空~" :image-size="300" />
+  <el-empty v-if="tableData.length <= 0" style="height: 572px;" description="数据为空~" :image-size="300" />
   <div class="table" v-if="tableData.length > 0">
     <!-- table表格 -->
     <el-table :data="tableData" border stripe :height="tableData[0].username ? 400 : 510">
@@ -206,12 +206,12 @@ const del = async (rowVal) => {
   if (!res.data.status) {
     ElMessage.error(res.data.message)
   } else {
-    currentPage.value = 1
     ElMessage({
       message: res.data.message,
       type: 'success',
     })
     emit("againRequest", currentPage.value)
+    currentPage.value = 1
   }
 }
 // 3、获取指定角色接口
