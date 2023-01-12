@@ -5,7 +5,7 @@
       <el-option v-for="item in options" :key="item.id" :label="item.username" :value="item.id" />
     </el-select>
 
-    <input type="file" id="file" style="display: none;" :accept="props.accept">
+    <input type="file" id="file" style="display: none;" :accept="props.accept" multiple>
     <el-button style="margin-left: 10px;" type="primary" @click="upload">上传</el-button>
   </div>
   <progress value="0" max="100" style="display: none;"></progress>
@@ -45,6 +45,14 @@ onMounted(() => {
 
   fileEL.addEventListener("change", () => {
     const fileInfos = Array.from(fileEL.files);
+
+    // 限制个数
+    if (fileInfos.length > 3) {
+      showNotify("数量不能超过3个~");
+      fileInfos = []
+      return
+    }
+
     let fileSize = fileInfos[0].size;
     let progressVal = 0;
 
