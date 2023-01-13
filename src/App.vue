@@ -18,5 +18,6 @@ const { locale } = reactive({
 #app {
   height: 100%;
   width: 100%;
+  min-width: 700px;
 }
 </style>
