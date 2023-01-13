@@ -54,6 +54,7 @@ const signOut = () => {
   top: 0;
   z-index: 99;
   width: 100%;
+  min-width: 700px;
   padding: 4px 0 4px 0;
   box-sizing: border-box;
   background-color: white;
