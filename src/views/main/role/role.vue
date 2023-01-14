@@ -20,6 +20,13 @@ import Table from "../../../components/Table.vue"
 import XWLRequest from '../../../servise';
 import Input from "../../../components/Input.vue"
 
+// 懒加载
+const loading = ElLoading.service({
+  lock: true,
+  text: 'Loading',
+  background: 'rgba(0, 0, 0, 0.7)',
+})
+
 // table.vue
 // 1、table.vue的placeholder值
 const placeholderVal = ref('请输入角色名~')
@@ -72,6 +79,11 @@ const getRole = async (limit = 10, offset = 1, inputVal) => {
   }
 
   tableData.value = res.data.message
+
+  // 懒加载关闭
+  setTimeout(() => {
+    loading.close()
+  }, 500)
 }
 getRole()
 
