@@ -63,6 +63,11 @@ const rules = reactive({
 // 登录功能
 const submitForm = (formEl) => {
   if (!formEl) return
+  const rl = /^[\da-z]+$/i
+  if (rl.test(formData.username)) {
+    showNotify('用户名由字母或数字组成');
+    return
+  }
   formEl.validate((valid) => {
     if (valid) {
       XWLRequest.post({ url: '/user/login', data: { username: formData.username, password: formData.password } })
