@@ -1,9 +1,6 @@
 <template>
   <div class="login">
-    <div style="margin-top: -5%;">
-      <h1>登录界面</h1>
-      <Form />
-    </div>
+    <Form />
   </div>
 </template>
 
@@ -22,14 +19,5 @@ import Form from "./cpn/form.vue"
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.login div {
-  width: 450px;
-}
-
-.login div h1 {
-  text-align: center;
-  padding-bottom: 5%;
 }
 </style>

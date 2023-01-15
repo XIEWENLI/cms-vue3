@@ -11,6 +11,14 @@ import * as echarts from 'echarts';
 import { option } from "./echarts.config"
 import XWLRequest from "../../../servise/index"
 
+// 懒加载
+const loading = ElLoading.service({
+  lock: true,
+  text: 'Loading',
+  background: 'rgba(0, 0, 0, 0.7)',
+})
+
+
 const divEl = ref(null)
 
 const rq1 = XWLRequest.get({ url: '/common/getStatus', params: { fieldName: "numberOfUsers" } })
@@ -26,6 +34,11 @@ Promise.all([rq1, rq2]).then(res => {
   option.series[0].data[1] = res[1].data.message.memory
   var myChart = echarts.init(divEl.value);
   myChart.setOption(option);
+
+  // 懒加载关闭
+  setTimeout(() => {
+    loading.close()
+  }, 500)
 }).catch(err => {
   console.log(err);
 })

@@ -25,6 +25,13 @@ import Table from "../../../components/Table.vue"
 import Input from "../../../components/Input.vue"
 import Upload from "../../../components/Upload.vue"
 
+// 懒加载
+const loading = ElLoading.service({
+  lock: true,
+  text: 'Loading',
+  background: 'rgba(0, 0, 0, 0.7)',
+})
+
 // 上传弹窗
 const dialogVisible = ref(false)
 // 关闭
@@ -75,6 +82,11 @@ const getImage = async (limit = 10, offset = 0, inputVal) => {
 
   // 对象数组
   tableData.value = res.data.message
+
+  // 懒加载关闭
+  setTimeout(() => {
+    loading.close()
+  }, 500)
 }
 getImage()
 

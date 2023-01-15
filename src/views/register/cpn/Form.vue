@@ -114,3 +114,9 @@ const jumpLogin = () => {
   router.replace("/login")
 }
 </script>
+
+<style scoped>
+.form {
+  margin-left: -8%;
+}
+</style>
