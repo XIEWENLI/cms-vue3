@@ -80,8 +80,9 @@ const rules = reactive({
 // 注册功能
 const submitForm = (formEl) => {
   if (!formEl) return
+  const rl = /^[\da-z]+$/i
   if (!rl.test(formData.username)) {
-    showNotify('用户名由字母或数字组成');
+    ElMessage.error('用户名由字母或数字组成~');
     return
   }
   formEl.validate((valid) => {
