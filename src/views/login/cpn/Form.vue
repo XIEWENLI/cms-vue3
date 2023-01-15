@@ -1,6 +1,6 @@
 <template>
   <div class="form">
-    <el-form ref="formDataRef" :model="formData" status-icon :rules="rules" label-width="100px" class="demo-formData">
+    <el-form ref="formDataRef" :model="formData" status-icon :rules="rules" label-width="85px" class="demo-formData">
       <el-form-item label="账&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp号：" prop="username">
         <el-input v-model="formData.username" />
       </el-form-item>
@@ -100,3 +100,8 @@ const jumpRegister = () => {
   router.replace("/register")
 }
 </script>
+<style scoped>
+.form {
+  margin-left: -8%;
+}
+</style>
