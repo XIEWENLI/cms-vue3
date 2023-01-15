@@ -64,7 +64,7 @@ const rules = reactive({
 const submitForm = (formEl) => {
   if (!formEl) return
   const rl = /^[\da-z]+$/i
-  if (rl.test(formData.username)) {
+  if (!rl.test(formData.username)) {
     showNotify('用户名由字母或数字组成');
     return
   }
