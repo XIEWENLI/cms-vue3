@@ -6,7 +6,8 @@
     <el-table :data="tableData" border stripe :height="tableData[0].username ? 400 : 510">
       <template v-for="item, key in tableData[0]" :key="key">
         <el-table-column :prop="key" :label="key"
-          :width="key === 'id' ? '80px' : (key === 'fileName' || key === 'type' || key === 'user_id' || key === 'size' ? '180px' : 'none')">
+          :width="key === 'id' ? '80px' : (key === 'fileName' || key === 'type' || key === 'user_id' || key === 'size' ? '180px' : 'none')"
+          :min-width="key === 'file' ? '300px' : 'none'">
           <!-- 一、user.vue -->
           <template v-if="key === 'username'" #header>
             用户名
@@ -72,6 +73,9 @@
           <template v-if="key === 'file'" #header>
             文件
           </template>
+          <template v-if="key === 'size'" #default="{ row }">
+            {{ (row.size / 1024 / 1024).toFixed(3) }}
+          </template>
           <template v-if="key === 'file'" #default="{ row }">
             <!-- image -->
             <div class="flex" style="justify-content: space-around;" v-if="row.type.split('/')[0] === 'image'">
@@ -89,9 +93,6 @@
               <el-button size="small" type="info" @click="downloadFile(row)" plain>下载</el-button>
               <el-button size="small" type="danger" @click="deleteFile(row)" plain>删除</el-button>
             </div>
-          </template>
-          <template v-if="key === 'size'" #default="{ row }">
-            {{ (row.size / 1024 / 1024).toFixed(3) }}
           </template>
 
         </el-table-column>
