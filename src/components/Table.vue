@@ -379,11 +379,6 @@ const getUserInfo = async (user_id) => {
 const downloadFile = async ({ id: file_id, fileName, type, user_id }) => {
   let userId = await getUserIdByUserName(user_id)
 
-  if (!res.data.status) {
-    showNotify(res.data.message);
-    return
-  }
-
   let fn = fileName + "." + type.split('/')[1]
 
   const a = document.createElement('a')
