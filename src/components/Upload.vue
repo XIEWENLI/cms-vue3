@@ -44,7 +44,7 @@ onMounted(() => {
   }
 
   fileEL.addEventListener("change", () => {
-    const fileInfos = Array.from(fileEL.files);
+    let fileInfos = Array.from(fileEL.files);
 
     // 限制个数
     if (fileInfos.length > 3) {
@@ -196,5 +196,10 @@ getUsers()
 <style lang="less" scoped>
 .upload {
   display: flex;
+}
+
+progress {
+  display: block !important;
+  margin: 0 0 5px 10px;
 }
 </style>
