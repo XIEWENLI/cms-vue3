@@ -95,7 +95,7 @@ onMounted(() => {
             return !fileSliceArr.includes(item.hash);
           });
         } catch (err) {
-          console.log("获取已上传切片失败的原因：" + err.response.data);
+          console.log("获取已上传切片失败的原因：" + err);
         }
 
         // 遍历上传每一片
@@ -125,7 +125,7 @@ onMounted(() => {
                 }
               })
               .catch((err) => {
-                console.log("切片上传失败的原因：" + err.response.data);
+                console.log("切片上传失败的原因：" + err);
               })
           );
         });
@@ -158,7 +158,7 @@ onMounted(() => {
               console.log(res.data.file);
             })
               .catch((err) => {
-                console.log("合并切片失败的原因：" + err.response.data);
+                console.log("合并切片失败的原因：" + err);
               });
           })
           .catch((err) => {
@@ -199,7 +199,6 @@ getUsers()
 }
 
 progress {
-  display: block !important;
-  margin: 0 0 5px 10px;
+  margin: 5px 0 5px 10px;
 }
 </style>
