@@ -86,7 +86,7 @@
             </div>
             <!-- video -->
             <div class="flex" v-else>
-              <video width='220' height="100" :src="row.file" controls="controls">
+              <video width='220' height="100" controls="controls">
                 <source :src="row.file" type="video/mp4">
                 您的浏览器不支持 HTML5 video 标签。
               </video>
@@ -212,7 +212,6 @@ const del = async (rowVal) => {
       type: 'success',
     })
     emit("againRequest", currentPage.value)
-    currentPage.value = 1
   }
 }
 // 3、获取指定角色接口
@@ -419,6 +418,7 @@ const getUserIdByUserName = async (userName) => {
 <style lang="less" scoped>
 .table {
   padding: 10px;
+  min-width: 400px;
 }
 
 .pagination {
